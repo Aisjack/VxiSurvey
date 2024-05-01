@@ -1,0 +1,151 @@
+﻿@page "/take-survey/{DepartmentId:int}"
+@using VxiSurvey.Models.Entitties
+@using VxiSurvey.Services.QuestionsService
+
+@rendermode InteractiveServer
+@inject IQuestionService _questionService
+@inject NavigationManager _navManager
+
+<div class="d-flex justify-content-center mt-5">
+    <div class="card text-center" style="width: 55rem;">
+        <div class="card-body">
+
+            @if (DepartmentId == 0)
+            {
+                <h5 class="card-title mb-5">IT SURVEY FOR DESKTOP SUPPORT</h5>
+            }
+            else if (DepartmentId == 1)
+            {
+                <h5 class="card-title mb-5">IT SURVEY FOR SD/IM</h5>
+            }
+            else
+            {
+                <h5 class="card-title mb-5">No Department Selected</h5>
+            }
+
+            <MudText Typo="Typo.subtitle1">@ComponentQuestions[CurrentQuestion].Text</MudText>
+            <br />
+            <br />
+            <br />
+
+            <div class="d-flex flex-row justify-content-between">
+                <div class="justify-content-center mb-3">
+                    <MudPaper Elevation="0" Width="200px">
+                        <MudButton Disabled="@PreviousButtonDisabled" 
+                            Variant="Variant.Filled" 
+                            Size="Size.Large"
+                            Color="Color.Secondary"
+                            OnClick="PreviousQuestion">Previous Question</MudButton>
+                    </MudPaper>
+                </div>
+                <div class="justify-content-center mb-3">
+                    <MudPaper Elevation="0" Style="@($"background: {Colors.Shades.Transparent};")" MinHeight="25px">
+                        <MudRating Style="column-gap: 12px;" @bind-SelectedValue="@ComponentQuestions[CurrentQuestion].Rating" Size="Size.Large" />
+                    </MudPaper>
+                </div>
+                <div class="justify-content-center mb-3">
+                    <MudPaper Elevation="0" Width="200px">
+                        <MudButton Disabled="@NextButtonDisabled" 
+                            Variant="Variant.Filled" 
+                            Size="Size.Large"
+                            Color="Color.Tertiary"
+                            OnClick="NextQuestion">Next Question</MudButton>
+                    </MudPaper>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="d-flex justify-content-center mt-5">
+        <MudFab Disabled="@DisableFinishFab" 
+            DisableElevation Color="Color.Primary" 
+            StartIcon="@Icons.Material.Filled.ForwardToInbox" 
+            Label="Submit Survey Ratings" 
+            OnClick="FinishSurvey" />
+</div>
+
+@code {
+    [Parameter]
+    public int DepartmentId { get; set; }
+
+    List<Question> ComponentQuestions { get; set; } = new();
+    List<Question> ClientAnsweredQuestions { get; set; } = new();
+
+    private int CurrentQuestion = 0;
+    private int ComponentQuestionsCount;
+    private bool PreviousButtonDisabled = true;
+    private bool NextButtonDisabled = false;
+    private bool DisableFinishFab = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        base.OnParametersSetAsync();
+
+        await _questionService.GetAllQuestions(DepartmentId);
+        ComponentQuestions = _questionService.questions;
+        ComponentQuestionsCount = ComponentQuestions.Count() - 1;
+    }
+
+    void NextQuestion()
+    {
+        if(CurrentQuestion < ComponentQuestionsCount)
+        {
+            int currentQuestionId = ComponentQuestions[CurrentQuestion].Id;
+            var result = ClientAnsweredQuestions.Where(caq => caq.Id == currentQuestionId);
+            if (result != null)
+            {
+                ClientAnsweredQuestions.Remove(ComponentQuestions[CurrentQuestion]);
+                ClientAnsweredQuestions.Add(ComponentQuestions[CurrentQuestion]);
+                CurrentQuestion++;
+                PreviousButtonDisabled = false;
+            }
+            else
+            {
+                ClientAnsweredQuestions.Add(ComponentQuestions[CurrentQuestion]);
+                CurrentQuestion++;
+                PreviousButtonDisabled = false;
+            }
+
+        }
+        else
+        {
+            int currentQuestionId = ComponentQuestions[CurrentQuestion].Id;
+            var result = ClientAnsweredQuestions.Where(caq => caq.Id == currentQuestionId);
+            if (result != null)
+            {
+                ClientAnsweredQuestions.Remove(ComponentQuestions[CurrentQuestion]);
+                ClientAnsweredQuestions.Add(ComponentQuestions[CurrentQuestion]);
+                NextButtonDisabled = true;
+                DisableFinishFab = false;
+            }
+            else
+            {
+                ClientAnsweredQuestions.Add(ComponentQuestions[CurrentQuestion]);
+                NextButtonDisabled = true;
+                DisableFinishFab = false;
+            }
+
+        }
+    }
+
+    void PreviousQuestion()
+    {
+        if (CurrentQuestion > 0)
+        {
+            CurrentQuestion--;
+            NextButtonDisabled = false;
+            DisableFinishFab = true;
+        }
+        else
+        {
+            PreviousButtonDisabled = true;
+            DisableFinishFab = true;
+        }
+    }
+
+    async Task FinishSurvey()
+    {
+        await _questionService.FinishSurvey(ClientAnsweredQuestions);
+        _navManager.NavigateTo("/finish-survey");
+    }
+}

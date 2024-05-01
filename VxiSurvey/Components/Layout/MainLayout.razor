@@ -1,0 +1,29 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<div class="page">
+    <MudLayout>
+        <MudAppBar Elevation="1" Style="@($"color:{Theme.Palette.GrayDarker}; background:{Theme.Palette.Warning};")">
+            <MudText Typo="Typo.h5" Class="ml-3">VXI IT SURVEY</MudText>
+            <MudSpacer />
+        </MudAppBar>
+        <MudMainContent Class="ma-5">
+            @Body
+        </MudMainContent>
+    </MudLayout>
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+@code{
+    private MudTheme Theme = new MudTheme();
+}
+
+

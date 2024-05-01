@@ -1,0 +1,29 @@
+﻿@page "/finish-survey"
+
+@rendermode InteractiveServer
+@using VxiSurvey.Models.Entitties
+@using VxiSurvey.Services.QuestionsService
+
+@inject IQuestionService _questionService
+
+
+<div class="d-flex justify-content-center mt-5">
+    <MudDataGrid Elevation="0" Items="@ComponentQuestions" Filterable="false" SortMode="@SortMode.None" Groupable="false">
+        <ToolBarContent>
+            <MudText Typo="Typo.h5">Survey Finised, Thank you.</MudText>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="x => x.Text" Title="@string.Empty"/>
+            <PropertyColumn Property="x => x.Rating" />
+        </Columns>
+    </MudDataGrid>
+</div>
+
+@code {
+    private List<Question> ComponentQuestions { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ComponentQuestions = _questionService.answeredSurveyQuestions;
+    }
+}
