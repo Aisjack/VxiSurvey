@@ -1,29 +1,52 @@
 ﻿@page "/"
+@page "/department/{Id:int}"
+
+@using VxiSurvey.Models.Entitties
 @rendermode InteractiveServer
 @inject NavigationManager _navManager
+
+<PageTitle></PageTitle>
 
 <div class="d-flex justify-content-center mt-5">
     <div class="card text-center" style="width: 55rem;">
         <div class="card-body">
             <h5 class="card-title mb-5">Select Department Survey</h5>
 
+
+            @if(Id == null)
+            {
             <div class="col d-flex justify-content-center mb-3">
                 <MudPaper Width="200px">
-                    <MudButton Variant="Variant.Filled" Size="Size.Large" Color="Color.Tertiary" OnClick="(() => TakeSurvey(0))">It Survey for Desktop Support</MudButton>
+                    <MudButton Disabled Variant="Variant.Filled" Size="Size.Large" Color="Color.Warning">Survey not Available</MudButton>
                 </MudPaper>
             </div>
-            <div class="col d-flex justify-content-center mb-3">
-                <MudPaper Width="200px">
-                    <MudButton Variant="Variant.Filled" Size="Size.Large" Color="Color.Primary" OnClick="(() => TakeSurvey(1))">It Survey for SD/IM</MudButton>
-                </MudPaper>
-            </div>
+            }
+            @if(Id == (int)Department.DS)
+            {
+                <div class="col d-flex justify-content-center mb-3">
+                    <MudPaper Width="200px">
+                        <MudButton Variant="Variant.Filled" Size="Size.Large" Color="Color.Tertiary" OnClick="(() => TakeSurvey(0))">It Survey for Desktop Support</MudButton>
+                    </MudPaper>
+                </div>
+            }
+            else if(Id == (int)Department.SDIM)
+            {
+                <div class="col d-flex justify-content-center mb-3">
+                    <MudPaper Width="200px">
+                        <MudButton Variant="Variant.Filled" Size="Size.Large" Color="Color.Primary" OnClick="(() => TakeSurvey(1))">It Survey for SD/IM</MudButton>
+                    </MudPaper>
+                </div>
+            }
         </div>
     </div>
 </div>
 
 @code{
+    [Parameter]
+    public int? Id { get; set; }
+
     void TakeSurvey(int departmentId)
     {
-        _navManager.NavigateTo($"/take-survey/{departmentId}");
+        _navManager.NavigateTo($"/VxiSurvey/take-survey/{departmentId}");
     }
 }

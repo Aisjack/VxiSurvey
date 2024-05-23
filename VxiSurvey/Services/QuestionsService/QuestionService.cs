@@ -1,9 +1,16 @@
-﻿using VxiSurvey.Models.Entitties;
+﻿using VxiSurvey.Data;
+using VxiSurvey.Models.Entitties;
 
 namespace VxiSurvey.Services.QuestionsService
 {
     public class QuestionService : IQuestionService
     {
+        private readonly DataContext _db;
+        public QuestionService(DataContext db)
+        {
+            _db = db;
+        }
+
         public List<Question> questions { get; private set; } = new();
         public List<Question> answeredSurveyQuestions { get; private set; } = new();
 
@@ -46,6 +53,43 @@ namespace VxiSurvey.Services.QuestionsService
         public async Task FinishSurvey(List<Question> clientAnsweredQuestions)
         {
             answeredSurveyQuestions = clientAnsweredQuestions;
+
+            var SurveyResponseData = new SurveyResponse
+            {
+                ResponseGuid = Guid.NewGuid()
+            };
+
+            var ServiceTransaction = _db.Database.BeginTransaction();
+
+            try
+            {
+                await _db.SurveyResponse.AddAsync(SurveyResponseData);
+                await _db.SaveChangesAsync();
+
+                List<QuestionSurveyResponse> ServiceQuestionSurveyResponses = new List<QuestionSurveyResponse>();
+
+                foreach (var question in answeredSurveyQuestions)
+                {
+                    ServiceQuestionSurveyResponses.Add(new QuestionSurveyResponse
+                    {
+                        Text = question.Text,
+                        Rating = question.Rating,
+                        DepartmentId = question.DepartmentId,
+                        QuestionReferenceId = question.Id,
+                        SurveyResponseId = SurveyResponseData.Id
+                    });
+                }
+
+                await _db.QuestionSurveyResponses.AddRangeAsync(ServiceQuestionSurveyResponses);
+                await _db.SaveChangesAsync();
+
+                ServiceTransaction.Commit();
+            }
+            catch
+            {
+                ServiceTransaction.Rollback();
+            }
+
         }
     }
 }

@@ -1,12 +1,19 @@
 using VxiSurvey.Components;
 using MudBlazor.Services;
 using VxiSurvey.Services.QuestionsService;
+using VxiSurvey.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddDbContext<DataContext>(options => 
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
 builder.Services.AddMudServices();
 
@@ -23,6 +30,13 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles("/vxisurvey");
+
+app.UsePathBase("/vxisurvey");
+
+app.MapBlazorHub("/vxisurvey");
+
+app.UseRouting();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
@@ -31,3 +45,5 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
+
+

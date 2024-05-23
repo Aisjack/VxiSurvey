@@ -5,6 +5,7 @@
 @using VxiSurvey.Services.QuestionsService
 
 @inject IQuestionService _questionService
+@inject NavigationManager _navManager
 
 
 <div class="d-flex justify-content-center mt-5">
@@ -18,12 +19,23 @@
         </Columns>
     </MudDataGrid>
 </div>
+<div class="d-flex justify-content-center mt-5">
+    <MudFab DisableElevation Color="Color.Primary"
+             StartIcon="@Icons.Material.Filled.KeyboardReturn"
+             Label="Go Back to Homepage"
+             OnClick="ReturnToHome" />
+ </div>
 
-@code {
+ @code {
     private List<Question> ComponentQuestions { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
         ComponentQuestions = _questionService.answeredSurveyQuestions;
+    }
+
+    void ReturnToHome()
+    {
+        _navManager.NavigateTo($"/VxiSurvey/department/{ComponentQuestions[0].DepartmentId}");
     }
 }
