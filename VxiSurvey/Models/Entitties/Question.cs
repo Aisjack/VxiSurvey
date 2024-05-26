@@ -3,7 +3,7 @@
     public class Question
     {
         public int Id { get; set; }
-        public string Text { get; set; } = string.Empty;
+        public string? Text { get; set; }
         public int Rating { get; set; } = 3;
         public int? DepartmentId { get; set; }
     }

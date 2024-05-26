@@ -72,7 +72,6 @@ namespace VxiSurvey.Services.QuestionsService
                 {
                     ServiceQuestionSurveyResponses.Add(new QuestionSurveyResponse
                     {
-                        Text = question.Text,
                         Rating = question.Rating,
                         DepartmentId = question.DepartmentId,
                         QuestionReferenceId = question.Id,
